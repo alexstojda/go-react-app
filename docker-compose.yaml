@@ -1,0 +1,24 @@
+version: "3.4"
+
+services:
+  go-react-app-node-dev:
+    build:
+      context: .
+      target: node-dev
+    image: alexstojda/go-react-app-development:${VERSION:-local}
+
+  go-react-app-go-dev:
+    build:
+      context: .
+      target: go-dev
+    image: alexstojda/go-react-app-development:${VERSION:-local}
+
+  go-react-app:
+    build:
+      context: .
+      target: prod
+    image: alexstojda/go-react-app:${VERSION:-local}
+    environment:
+      - NAME=value
+    ports:
+      - "8080"
