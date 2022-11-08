@@ -1,5 +1,6 @@
 # Go React App
-A React Frontend/Golang backend microservice template. 
+
+A React Frontend/Golang backend microservice template.
 
 This project is bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -18,7 +19,6 @@ Install golang dependencies
 #### `make run`
 
 Runs the webserver
-
 
 ### Create React App
 
