@@ -48,5 +48,6 @@ COPY --from=node-dev --chown=golang:root /usr/src/app/build /app/html
 
 USER golang:root
 EXPOSE 8080
-WORKDIR /app
+
+ENV SPA_PATH=/app/html
 ENTRYPOINT ["/app/go-react-app"]

@@ -1,14 +1,15 @@
 package web
 
 import (
+	"go-react-app/web/api/health"
+	"go-react-app/web/api/hello"
+
 	"github.com/gin-contrib/logger"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/zsais/go-gin-prometheus"
-	"go-react-app/web/api/health"
-	"go-react-app/web/api/hello"
-	"go-react-app/web/spa"
+	ginprometheus "github.com/zsais/go-gin-prometheus"
 )
 
 type Server struct {
@@ -42,9 +43,9 @@ func (s *Server) StartServer() {
 
 	prometheus := ginprometheus.NewPrometheus("gin")
 
-	//Prevents high cardinality of metrics Source: https://github.com/zsais/go-gin-prometheus#preserving-a-low-cardinality-for-the-request-counter
+	// Prevents high cardinality of metrics Source: https://github.com/zsais/go-gin-prometheus#preserving-a-low-cardinality-for-the-request-counter
 	prometheus.ReqCntURLLabelMappingFn = func(c *gin.Context) string {
-		url := c.Request.URL.Path //Query params are dropped here so there is not a metric for every permutation of query param usage on a route
+		url := c.Request.URL.Path // Query params are dropped here so there is not a metric for every permutation of query param usage on a route
 
 		//  If a route uses parameters, replace the parameter value with its name. Else there will be a metric for the route with
 		//  with every possible value of that parameter and this will cause performance issues in Prometheus.
@@ -64,12 +65,15 @@ func (s *Server) StartServer() {
 
 	router.Use(errorHandler)
 
-	// SPA ROUTE
-	router.Use(spa.Middleware("/", s.SPAPath))
-
 	// API ROUTES
 	router.GET("/api/health", s.Health.Get)
 	router.GET("/api/hello", s.Hello.Get)
+
+	// SPA ROUTE
+	// Only loaded if SPAPath is defined.
+	if s.SPAPath != "" {
+		router.Use(static.Serve("/", static.LocalFile(s.SPAPath, true)))
+	}
 
 	err := router.Run()
 	if err != nil {

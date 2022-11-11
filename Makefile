@@ -1,11 +1,26 @@
+setup: mod
+	yarn install
+
 mod:
 	go mod download
 
-build:
-	go build -v -o go-react-app ./cmd/go-react-app/
+build: build-backend build-frontend
 
-run:
+build-backend:
+	mkdir -p ./build
+	go build -v -o ./build/go-react-app ./cmd/go-react-app/
+
+build-frontend:
+	yarn build
+
+run: build-frontend
+	SPA_PATH=./build go run cmd/go-react-app/main.go
+
+run-backend:
 	go run cmd/go-react-app/main.go
+
+run-frontend:
+	REACT_APP_API_HOST=http://localhost:8080 yarn start
 #
 #test:
 #	@go test ./...
