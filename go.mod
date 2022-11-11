@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/gin-contrib/logger v0.0.2
-	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.6.3
 	github.com/rs/zerolog v1.20.0
 	github.com/stretchr/testify v1.6.1

@@ -22,14 +22,15 @@ function App() {
         setHelloResponse(response.data)
       });
   }
-  
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          <strong>/api/hello</strong> returned: <pre>{JSON.stringify(helloResponse)}</pre>
-        </p>
+        <span>
+          <strong>/api/hello</strong> returned:
+        </span>
+        <pre>{JSON.stringify(helloResponse)}</pre>
       </header>
     </div>
   );
