@@ -30,12 +30,18 @@ jobs:
         node-version-file: .nvmrc
         # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
         cache: yarn
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true
     - name: Setup dependencies
       run: make setup
     - name: Run frontend tests
       run: yarn test
     - name: Run backend tests
       run: go test ./...
+    - name: Build Docker image
+      uses: docker/build-push-action@v3.2.0
+      with:
+        context: .
       
   publish:
     needs: install-and-test
@@ -52,7 +58,10 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true
+
     - name: Conventional Changelog Action
       id: semver
       uses: TriPSs/conventional-changelog-action@v3
