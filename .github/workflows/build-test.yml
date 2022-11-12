@@ -57,6 +57,7 @@ jobs:
       id: semver
       uses: TriPSs/conventional-changelog-action@v3
       with:
+        fallback-version: 0.0.0
         github-token: ${{ secrets.GITHUB_TOKEN }}
         git-push: false
         
@@ -78,13 +79,16 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-    
+
+    - name: Push changes
+      run: |
+        git push origin main --follow-tags
+
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
         draft: false
-        tag: ${{ steps.semver.outputs.tag }}
         name: ${{ steps.semver.outputs.tag }}
         body: ${{ steps.semver.outputs.clean_changelog }}
         token: ${{ github.token }}
