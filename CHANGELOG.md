@@ -1,4 +1,13 @@
-# 0.1.0 (2022-11-12)
+## [0.1.1](https://github.com/alexstojda/go-react-app/compare/v0.1.0...v0.1.1) (2022-11-12)
+
+
+### Bug Fixes
+
+* Fix release ([a99d264](https://github.com/alexstojda/go-react-app/commit/a99d2640f32fbf33ed71e1648a2467a62d9f3d09))
+
+
+
+# [0.1.0](https://github.com/alexstojda/go-react-app/compare/04ad20a3f4c3b528668e0cc9202e11ef7d687fe2...v0.1.0) (2022-11-12)
 
 
 ### Bug Fixes
