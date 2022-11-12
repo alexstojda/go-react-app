@@ -90,5 +90,6 @@ jobs:
         allowUpdates: true
         draft: false
         name: ${{ steps.semver.outputs.tag }}
+        tag: ${{ steps.semver.outputs.tag }}
         body: ${{ steps.semver.outputs.clean_changelog }}
         token: ${{ github.token }}
