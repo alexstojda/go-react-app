@@ -2,6 +2,7 @@
   "name": "my-app",
   "version": "0.0.0",
   "private": true,
+  "homepage": "/app",
   "dependencies": {
     "@babel/core": "^7.0.0-0",
     "@babel/plugin-syntax-flow": "^7.14.5",
@@ -21,11 +22,25 @@
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0"
   },
+  "devDependencies": {
+    "jest-sonar-reporter": "^2.0.0"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --reporters=default --coverage --testResultsProcessor jest-sonar-reporter",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "!**/generated/*.ts",
+      "!src/resources/*"
+    ]
+  },
+  "jestSonar": {
+    "reportPath": "reports",
+    "reportFile": "test-report.xml",
+    "indent": 4
   },
   "eslintConfig": {
     "extends": [

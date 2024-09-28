@@ -10,8 +10,12 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  install-and-test:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,35 +27,93 @@ jobs:
           cache: true
           # Used to specify the path to a dependency file - go.sum
           cache-dependency-path: go.sum
+      - name: Setup dependencies
+        run: make setup-backend env
+      - name: Generate code from spec
+        run: make generate-backend
+      - name: Run go vet
+        run: go vet ./...
+      - name: Run backend tests
+        run: make test-backend-cov
+      - uses: actions/upload-artifact@v3
+        with:
+          name: backend-reports
+          path: reports
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.5.1
         with:
           # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
-          node-version-file: .nvmrc
+          node-version-file: web/app/.nvmrc
           # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
           cache: yarn
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
+          cache-dependency-path: web/app/yarn.lock
       - name: Setup dependencies
-        run: make setup
+        run: make setup-frontend env
+      - name: Generate code from spec
+        run: make generate-frontend
       - name: Run frontend tests
-        run: yarn test
-      - name: Run backend tests
-        run: go test ./...
+        run: make test-frontend
+      - uses: actions/upload-artifact@v3
+        with:
+          name: frontend-reports
+          path: reports
+  docker:
+    runs-on: ubuntu-latest
+    needs:
+      - frontend
+      - backend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v2
       - name: Build Docker image
         uses: docker/build-push-action@v3.2.0
         with:
           context: .
-
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  sonar:
+    runs-on: ubuntu-latest
+    needs:
+      - publish
+    if: ${{ always() && (needs.publish.result == 'skipped' || needs.publish.result == 'success')  }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+          ref: ${{ github.ref == 'refs/heads/main' && 'main' || '' }}
+      - uses: actions/download-artifact@v3
+        with:
+          name: frontend-reports
+          path: reports
+      - uses: actions/download-artifact@v3
+        with:
+          name: backend-reports
+          path: reports
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   publish:
-    needs: install-and-test
+    needs:
+      - docker
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
       packages: write
+      contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          # Needed to bypass branch protections when publishing a release
+          token: ${{ secrets.GH_TOKEN }}
+      - uses: docker/setup-buildx-action@v2
       - name: Log in to the Container registry
         uses: docker/login-action@v2.1.0
         with:
@@ -59,16 +121,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
       - name: Conventional Changelog Action
-        id: semver
+        id: changelog
         uses: TriPSs/conventional-changelog-action@v3
         with:
+          git-user-name: github-actions
+          git-user-email: actions@github.com
           fallback-version: 0.0.0
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-commit: true
+          version-file: web/app/package.json
           git-push: false
+
+      - name: Update version field in OAPI spec file
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        uses: mikefarah/yq@v4.30.4
+        with:
+          cmd: yq -i '.info.version = "${{ steps.changelog.outputs.version }}"' 'api/openapi.yaml'
+
+      - name: Update version field of sonar-project.properties
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: sed -i "s/sonar.projectVersion=.*/sonar.projectVersion=${{ steps.changelog.outputs.version }}/" "sonar-project.properties"
+
+      - name: Commit release
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add .
+          git commit -m "chore(release): ${{ steps.changelog.outputs.tag }} [skip ci]"
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -78,7 +159,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=semver,pattern={{version}},value=${{ steps.semver.outputs.tag }}
+            type=semver,pattern={{version}},value=${{ steps.changelog.outputs.tag }}
       #          type=ref,event=branch
       #          type=ref,event=pr
 
@@ -88,6 +169,8 @@ jobs:
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -102,7 +185,7 @@ jobs:
         with:
           allowUpdates: true
           draft: false
-          name: ${{ steps.semver.outputs.tag }}
-          tag: ${{ steps.semver.outputs.tag }}
-          body: ${{ steps.semver.outputs.clean_changelog }}
+          name: ${{ steps.changelog.outputs.tag }}
+          tag: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
           token: ${{ github.token }}

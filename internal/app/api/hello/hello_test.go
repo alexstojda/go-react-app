@@ -2,11 +2,13 @@ package hello
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"go-react-app/internal/app/generated"
 )
 
 func TestHello_Get(t *testing.T) {
@@ -24,7 +26,7 @@ func TestHello_Get(t *testing.T) {
 
 	assert.Equal(t, resp.Code, 200)
 
-	data := Response{}
+	data := generated.HelloResponse{}
 
 	err := json.Unmarshal(resp.Body.Bytes(), &data)
 	if err != nil {
@@ -32,5 +34,5 @@ func TestHello_Get(t *testing.T) {
 		t.Fatalf("Could not unmarshal response body. Got %s", resp.Body.String())
 	}
 
-	assert.Equal(t, data, Response{Hello: "world"})
+	assert.Equal(t, data, generated.HelloResponse{Message: "Hello, World!"})
 }

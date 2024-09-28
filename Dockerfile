@@ -1,15 +1,54 @@
+#######
+# Generate Axios Typescript API Client
+#######
+FROM openapitools/openapi-generator-cli:v6.6.0 AS node-gen
+
+COPY api/.openapi-generator-ignore /out/
+COPY api/openapi.yaml /api/
+
+RUN /usr/local/bin/docker-entrypoint.sh generate \
+-i /api/openapi.yaml \
+-g typescript-axios \
+-o /out
+
+#######
+# Build SPA
+#######
 FROM node:18-alpine AS node-dev
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY package.json /usr/src/app
+RUN mkdir -p /app
+WORKDIR /app
+
+COPY web/app/package.json /app
 RUN yarn
-COPY . /usr/src/app
+
+COPY web/app/ /app
+COPY --from=node-gen /out/ /app/src/api/generated
+
 RUN yarn build
 
-ENTRYPOINT ["npm"]
+ENTRYPOINT ["yarn"]
 
-FROM golang:1.19-alpine AS go-dev
+#######
+# Golang shared base image
+#######
+FROM golang:1.22-alpine AS go-base
+
+#######
+# Generate Golang API Server
+#######
+FROM go-base AS go-gen
+
+RUN go install "github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.13.0"
+RUN mkdir -p /out
+
+COPY api /api
+RUN /go/bin/oapi-codegen -config /api/oapi-codegen.config.yaml /api/openapi.yaml > /out/openapi.gen.go
+
+#######
+# Build API Server
+#######
+FROM go-base AS go-dev
 
 ENV CGO_ENABLED=0 \
   GOOS=linux \
@@ -29,25 +68,31 @@ COPY --chown=golang:root go.mod go.sum Makefile ./
 
 RUN make mod
 
-COPY --chown=golang:root . ./
-RUN go build -v -o go-react-app ./cmd/go-react-app/
+COPY --chown=golang:root main.go ./
+COPY --chown=golang:root internal ./internal
+COPY --from=go-gen /out/ internal/app/generated/
+RUN go build -v -o pinman main.go
 
 ENTRYPOINT ["make"]
-#CMD ["test"]
+CMD ["test"]
 
-###
-
+#######
+# Final production image with all assets
+#######
 FROM scratch AS prod
 
 COPY --from=go-dev /etc/passwd /etc/group  /etc/
 COPY --from=go-dev /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # Kube crashes if there isn't a tmp directory to write error logs to
 COPY --from=go-dev --chown=golang:root /tmp /tmp
-COPY --from=go-dev --chown=golang:root /app/go-react-app /app/
-COPY --from=node-dev --chown=golang:root /usr/src/app/build /app/html
+COPY --from=go-dev --chown=golang:root /app/pinman /app/
+COPY --from=node-dev --chown=golang:root /app/build /app/html
+
+COPY --chown=golang:root .env /app/
 
 USER golang:root
 EXPOSE 8080
 
 ENV SPA_PATH=/app/html
-ENTRYPOINT ["/app/go-react-app"]
+WORKDIR /app
+ENTRYPOINT ["./pinman"]
