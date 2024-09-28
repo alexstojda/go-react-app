@@ -1,24 +1,43 @@
-version: "3.4"
-
 services:
   go-react-app-node-dev:
     build:
       context: .
       target: node-dev
-    image: alexstojda/go-react-app-development:${VERSION:-local}
+    image: alexstojda/go-react-app/node-dev:${VERSION:-local}
 
   go-react-app-go-dev:
     build:
       context: .
       target: go-dev
-    image: alexstojda/go-react-app-development:${VERSION:-local}
+    image: alexstojda/go-react-app/go-dev:${VERSION:-local}
 
   go-react-app:
     build:
       context: .
       target: prod
-    image: alexstojda/go-react-app:${VERSION:-local}
-    environment:
-      - NAME=value
+      args:
+        REACT_APP_API_HOST: http://localhost:8080
+    env_file:
+      - ./.env.local
     ports:
-      - "8080"
+      - "8080:8080"
+    image: alexstojda/go-react-app:${VERSION:-local}
+
+  ## Code generation
+  openapi-server:
+    build:
+      context: .
+      target: go-gen
+    image: alexstojda/go-react-app/openapi-server:${VERSION:-local}
+    entrypoint: "sleep"
+    command:
+      - infinity
+
+  openapi-client:
+    build:
+      context: .
+      target: node-gen
+    image: alexstojda/go-react-app/openapi-client:${VERSION:-local}
+    entrypoint: "sleep"
+    command:
+      - infinity

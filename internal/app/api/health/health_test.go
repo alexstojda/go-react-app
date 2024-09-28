@@ -2,11 +2,13 @@ package health
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"go-react-app/internal/app/generated"
 )
 
 func TestHealth_Get(t *testing.T) {
@@ -24,7 +26,7 @@ func TestHealth_Get(t *testing.T) {
 
 	assert.Equal(t, resp.Code, 200)
 
-	data := Response{}
+	data := generated.HealthResponse{}
 
 	err := json.Unmarshal(resp.Body.Bytes(), &data)
 	if err != nil {
@@ -32,5 +34,5 @@ func TestHealth_Get(t *testing.T) {
 		t.Fatalf("Could not unmarshal response body. Got %s", resp.Body.String())
 	}
 
-	assert.Equal(t, data, Response{Status: "ok"})
+	assert.Equal(t, data, generated.HealthResponse{Status: "OK"})
 }

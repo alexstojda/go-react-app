@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  description: A Template for a an app with a Go backend and a React frontend
+  title: Go React App
+  version: 0.1.1
+servers:
+  - url: http://localhost:8080/api
+paths:
+  /health:
+    get:
+      summary: Returns a health check message
+      responses:
+        '200':
+          $ref: '#/components/responses/HealthResponse'
+  /hello:
+    get:
+      summary: Returns a hello message
+      responses:
+        '200':
+          $ref: '#/components/responses/HelloResponse'
+components:
+  responses:
+    HealthResponse:
+      description: A successful health response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: OK
+                x-oapi-codegen-extra-tags:
+                  binding: required
+            required:
+              - status
+    HelloResponse:
+      description: A successful hello response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Hello, World!
+                x-oapi-codegen-extra-tags:
+                  binding: required
+            required:
+              - message

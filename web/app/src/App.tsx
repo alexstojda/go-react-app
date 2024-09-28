@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
-import apiUrl from './helpers/apiUrl';
+import {ReactComponent as Logo} from './logo.svg';
 import './App.css';
-import axios from 'axios';
+import {Api} from "./api";
+
+const api = new Api();
 
 function App() {
   const [helloResponse, setHelloResponse] = useState({});
@@ -12,21 +13,15 @@ function App() {
   })
 
   function getHello() {
-    axios
-      .get(apiUrl("/api/hello"), {
-        headers: {
-          Accept: "application/json",
-        },
+      api.api().helloGet().then((response) => {
+        setHelloResponse(response.data.message)
       })
-      .then((response) => {
-        setHelloResponse(response.data)
-      });
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <Logo className="App-logo" />
         <span>
           <strong>/api/hello</strong> returned:
         </span>
