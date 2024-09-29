@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   description: A Template for a an app with a Go backend and a React frontend
   title: Go React App
-  version: 0.2.0
+  version: 0.2.1
 servers:
   - url: http://localhost:8080/api
 paths:
