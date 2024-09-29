@@ -39,7 +39,7 @@ FROM golang:1.22-alpine AS go-base
 #######
 FROM go-base AS go-gen
 
-RUN go install "github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.13.0"
+RUN go install "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1"
 RUN mkdir -p /out
 
 COPY api /api
