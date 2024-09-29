@@ -18,14 +18,11 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Go environment
-        uses: actions/setup-go@v3.3.1
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          # Used to specify whether caching is needed. Set to true, if you'd like to enable caching.
-          cache: true
-          # Used to specify the path to a dependency file - go.sum
           cache-dependency-path: go.sum
       - name: Setup dependencies
         run: make setup-backend env
@@ -35,29 +32,27 @@ jobs:
         run: go vet ./...
       - name: Run backend tests
         run: make test-backend-cov
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: backend-reports
           path: reports
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v4
         with:
-          # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
-          node-version-file: web/app/.nvmrc
-          # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
+          node-version-file: ./web/app/.nvmrc
           cache: yarn
-          cache-dependency-path: web/app/yarn.lock
+          cache-dependency-path: '**/yarn.lock'
       - name: Setup dependencies
         run: make setup-frontend env
       - name: Generate code from spec
         run: make generate-frontend
       - name: Run frontend tests
         run: make test-frontend
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: frontend-reports
           path: reports
@@ -67,10 +62,10 @@ jobs:
       - frontend
       - backend
     steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-buildx-action@v2
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
       - name: Build Docker image
-        uses: docker/build-push-action@v3.2.0
+        uses: docker/build-push-action@v6
         with:
           context: .
           cache-from: type=gha
@@ -81,21 +76,19 @@ jobs:
       - publish
     if: ${{ always() && (needs.publish.result == 'skipped' || needs.publish.result == 'success')  }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting
           fetch-depth: 0
-          ref: ${{ github.ref == 'refs/heads/main' && 'main' || '' }}
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: frontend-reports
           path: reports
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: backend-reports
           path: reports
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -108,14 +101,9 @@ jobs:
       packages: write
       contents: write
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          # Needed to bypass branch protections when publishing a release
-          token: ${{ secrets.GH_TOKEN }}
-      - uses: docker/setup-buildx-action@v2
+      - uses: actions/checkout@v4
       - name: Log in to the Container registry
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -123,7 +111,7 @@ jobs:
 
       - name: Conventional Changelog Action
         id: changelog
-        uses: TriPSs/conventional-changelog-action@v3
+        uses: TriPSs/conventional-changelog-action@v5
         with:
           git-user-name: github-actions
           git-user-email: actions@github.com
@@ -154,18 +142,16 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=semver,pattern={{version}},value=${{ steps.changelog.outputs.tag }}
-      #          type=ref,event=branch
-      #          type=ref,event=pr
 
       - name: Build and push Docker image
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        uses: docker/build-push-action@v3.2.0
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
