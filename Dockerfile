@@ -1,7 +1,7 @@
 #######
 # Generate Axios Typescript API Client
 #######
-FROM openapitools/openapi-generator-cli:v6.6.0 AS node-gen
+FROM openapitools/openapi-generator-cli:v7.8.0 AS node-gen
 
 COPY api/.openapi-generator-ignore /out/
 COPY api/openapi.yaml /api/

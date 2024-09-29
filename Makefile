@@ -42,13 +42,10 @@ build-frontend:
 	@cd $(FRONTEND_DIR) && yarn build
 
 run: clean generate build-frontend
-	@SPA_PATH=./web/app/build go run main.go
+	@SPA_PATH=./web/app/build ENV_FILE=.env.local go run main.go
 
 run-backend:
 	@ENV_FILE=.env.local go run main.go
-
-run-database:
-	@docker compose up -d postgres
 
 run-frontend:
 	@cd $(FRONTEND_DIR) && REACT_APP_API_HOST=http://localhost:8080/api yarn start
