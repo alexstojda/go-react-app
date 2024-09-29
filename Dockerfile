@@ -14,7 +14,7 @@ RUN /usr/local/bin/docker-entrypoint.sh generate \
 #######
 # Build SPA
 #######
-FROM node:18-alpine AS node-dev
+FROM node:20-alpine AS node-dev
 
 RUN mkdir -p /app
 WORKDIR /app
