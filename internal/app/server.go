@@ -123,10 +123,10 @@ func newPrometheus() *ginprometheus.Prometheus {
 }
 
 func newGinLogger() gin.HandlerFunc {
-	return logger.SetLogger(logger.Config{
-		SkipPath: []string{
+	return logger.SetLogger(
+		logger.WithSkipPath([]string{
 			"/health",
 			"/metrics",
-		},
-	})
+		}),
+	)
 }
