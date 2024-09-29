@@ -34,7 +34,10 @@
     "collectCoverageFrom": [
       "!**/generated/*.ts",
       "!src/resources/*"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^axios$": "axios/dist/node/axios.cjs"
+    }
   },
   "jestSonar": {
     "reportPath": "reports",
