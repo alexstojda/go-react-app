@@ -1,65 +1,30 @@
 {
-  "name": "create-react-app",
-  "version": "0.0.0",
+  "name": "app",
   "private": true,
-  "homepage": "/app",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/plugin-syntax-flow": "^7.24.7",
-    "@babel/plugin-transform-react-jsx": "^7.25.2",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "^14.5.2",
-    "@types/jest": "^29.5.13",
-    "@types/node": "^20.16.10",
-    "@types/react": "^18.3.10",
-    "@types/react-dom": "^18.3.0",
     "axios": "^1.7.7",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.4.2"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "jest-sonar-reporter": "^2.0.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --reporters=default --coverage --testResultsProcessor jest-sonar-reporter",
-    "eject": "react-scripts eject"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "!**/generated/*.ts",
-      "!src/resources/*"
-    ],
-    "moduleNameMapper": {
-      "^axios$": "axios/dist/node/axios.cjs"
-    }
-  },
-  "jestSonar": {
-    "reportPath": "reports",
-    "reportFile": "test-report.xml",
-    "indent": 4
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "@eslint/js": "^9.11.1",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.11.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.9.0",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.0.1",
+    "vite": "^5.4.1"
   }
 }

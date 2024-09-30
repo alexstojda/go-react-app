@@ -3,8 +3,8 @@ import {Configuration, DefaultApi} from "./generated";
 export class Api {
     private configuration(): Configuration {
         const openapiConfig = new Configuration();
-        if (process.env.REACT_APP_API_HOST !== "")
-            openapiConfig.basePath = process.env.REACT_APP_API_HOST
+        if (import.meta.env.VITE_API_HOST !== "")
+            openapiConfig.basePath = import.meta.env.VITE_API_HOST
         return openapiConfig;
     };
 
