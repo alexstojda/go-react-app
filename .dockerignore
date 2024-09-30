@@ -1,11 +1,11 @@
-/node_modules
+node_modules
 
-.dockerignore
 .gitignore
 .git
 .idea
-.minikube
-deploy-minikube.sh
 docker-compose.yaml
 Dockerfile
 README.md
+sonar-project.properties
+
+dist

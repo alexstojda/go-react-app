@@ -42,13 +42,13 @@ build-frontend:
 	@cd $(FRONTEND_DIR) && yarn build
 
 run: clean generate build-frontend
-	@SPA_PATH=./web/app/build ENV_FILE=.env.local go run main.go
+	@SPA_PATH=./web/app/dist ENV_FILE=.env.local go run main.go
 
 run-backend:
 	@ENV_FILE=.env.local go run main.go
 
 run-frontend:
-	@cd $(FRONTEND_DIR) && REACT_APP_API_HOST=http://localhost:8080/api yarn start
+	@cd $(FRONTEND_DIR) && VITE_API_HOST=http://localhost:8080/api yarn start
 
 test: test-backend test-frontend
 

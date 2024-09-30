@@ -1,34 +1,53 @@
-import React, { useEffect, useState } from 'react';
-import {ReactComponent as Logo} from './logo.svg';
-import './App.css';
+import {useEffect, useState} from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 import {Api} from "./api";
 
 const api = new Api();
 
 function App() {
-  const [helloResponse, setHelloResponse] = useState({});
+  const [helloMessage, setHelloMessage] = useState<string>("");
+  const [updateTime, setUpdateTime] = useState<string>("");
 
   useEffect(() => {
-    getHello()
-  })
+    updateMessage()
+  }, [])
 
-  function getHello() {
-      api.api().helloGet().then((response) => {
-        setHelloResponse(response.data.message)
-      })
+  function updateMessage() {
+    api.api().helloGet().then((response) => {
+      setHelloMessage(response.data.message)
+    }).finally(() => {
+      setUpdateTime(new Date().toLocaleTimeString())
+    })
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <Logo className="App-logo" />
-        <span>
-          <strong>/api/hello</strong> returned:
-        </span>
-        <pre>{JSON.stringify(helloResponse)}</pre>
-      </header>
-    </div>
-  );
+    <>
+      <div>
+        <a href="https://vitejs.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo"/>
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo"/>
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => updateMessage()}>
+          Message is '{helloMessage}'
+          <br/>
+          Updated at {updateTime}
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default App;
+export default App

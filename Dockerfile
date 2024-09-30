@@ -19,7 +19,7 @@ FROM node:20-alpine AS node-dev
 RUN mkdir -p /app
 WORKDIR /app
 
-COPY web/app/package.json /app
+COPY web/app/package.json web/app/yarn.lock /app/
 RUN yarn
 
 COPY web/app/ /app
@@ -86,7 +86,7 @@ COPY --from=go-dev /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 # Kube crashes if there isn't a tmp directory to write error logs to
 COPY --from=go-dev --chown=golang:root /tmp /tmp
 COPY --from=go-dev --chown=golang:root /app/pinman /app/
-COPY --from=node-dev --chown=golang:root /app/build /app/html
+COPY --from=node-dev --chown=golang:root /app/dist /app/html
 
 COPY --chown=golang:root .env /app/
 
