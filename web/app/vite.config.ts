@@ -9,5 +9,13 @@ export default defineConfig({
   test: {
     // 👋 add the line below to add jsdom to vite
     environment: 'jsdom',
+    reporters: [
+      'default', // Vitest's default reporter so that terminal output is still visible
+      ['vitest-sonar-reporter', { outputFile: './reports/test-report.xml' }],
+    ],
+    coverage: {
+      reporter: ['lcov', 'html'],
+      reportsDirectory: './reports'
+    }
   }
 })
