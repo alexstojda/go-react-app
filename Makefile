@@ -16,7 +16,10 @@ env-local:
 	@cp .env .env.local
 
 clean:
-	@rm -rf $(FRONTEND_DIR)/build
+	@rm -rf $(FRONTEND_DIR)/build \
+		$(FRONTEND_DIR)/dist \
+		$(FRONTEND_DIR)/*.tsbuildinfo \
+		reports
 
 generate: generate-backend generate-frontend
 
@@ -59,7 +62,7 @@ test-frontend:
 	@cd $(FRONTEND_DIR) && yarn test
 	@rm -rf ./reports/ts && true
 	@mkdir -p ./reports/ts
-	@mv -f $(FRONTEND_DIR)/coverage $(FRONTEND_DIR)/reports ./reports/ts/
+	@mv -f $(FRONTEND_DIR)/reports/* ./reports/ts
 
 test-backend: test-setup
 	@ginkgo	./...
