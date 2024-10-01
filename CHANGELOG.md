@@ -1,3 +1,13 @@
+# [0.3.0](https://github.com/alexstojda/go-react-app/compare/v0.2.1...v0.3.0) (2024-10-01)
+
+
+### Features
+
+* **frontend:** Setup vitest with simple test ([570c97d](https://github.com/alexstojda/go-react-app/commit/570c97d8083c55e8af1bf5b4f393dc1052f9a050))
+* **frontend:** Switch to vite for frontend ([7ccb503](https://github.com/alexstojda/go-react-app/commit/7ccb50395716885e0393b8a0f9c521aa90cf88c1))
+
+
+
 ## [0.2.1](https://github.com/alexstojda/go-react-app/compare/v0.2.0...v0.2.1) (2024-09-29)
 
 
